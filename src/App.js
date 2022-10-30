@@ -1,60 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState} from "react";
 import axios from 'axios';
 
+function App() {
+    const [data, setData] = useState([]);
+    const [input, setInput] = useState([]);
 
-export default function App() {
-    const [data, setData] = useState([])
-    const [filteredData, setFilteredData] = useState([]);
-    const [input, setInput] = useState('');
-    
-    
 
-    useEffect(() => {
-        axios.get(`http://localhost:5000/price`)
-            .then((response) => {
-                
-                setData(response.data);
-                console.log(response.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            })
-    }, [])
-    
+    function handleChange(event) {
+        setInput(event.target.value);
+    }
 
-    const searchDest = (searchValue) => {
-        setInput(searchValue)
-        if (input !== '') {
-            
-            const filteredData = data.filter((item) => {                
-               return Object.values(item).join('').toLowerCase().includes(input.toLowerCase())
-                
-            })
-            console.log(filteredData);
-            setFilteredData(filteredData)
-            
-        }
+    function handleSubmit(event) {
+        event.preventDefault();
+        axios.get(`http://localhost:5000/price?country=${input}`, {
+    
+        })
+            .then(res => {
+                const data = res.data;
+                console.log(data);
+                setData(data);
+            }).catch(err => {
+            console.log(err);
+        });
     }
 
     return (
         <div style={{ padding: 40 }}>
-            <h2>Search for a destination</h2>
-            <input icon='search'
-                placeholder='Search...'
-                onChange={(e) => searchDest(e.target.value)}
-            />
+        <h2>Enter A Destination</h2>    
+        <form onSubmit={handleSubmit}>
+            
+            <input type="text" onChange={handleChange}/>
+            <button style={{marginLeft: 10}} type="submit">Get Price</button>
             <div>
-                
-                {input.length > 1 ? (
-                    filteredData.map((country) => {
-  
-                        return (               
-                            <p>{country.price}</p>
-                            
-                        )
-                    })
-                ) : null}
+                {
+                data.map(data => <p key={data.country}>{data.price}</p>)
+                }
             </div>
+        </form>
         </div>
-    )
+    );
 }
+
+export default App;
